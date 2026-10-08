@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Login / Sign Up</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-container {
+      max-width: 480px;
+      margin: 40px auto;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--background);
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .auth-tab.active {
+      background: var(--surface);
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+    .auth-form {
+      padding: 32px;
+    }
+    .toggle-section {
+      display: none;
+    }
+    .toggle-section.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar Hook -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top: 40px; margin-bottom: 80px;">
+    <div class="auth-container">
+      <div class="auth-tabs">
+        <div id="tab-login" class="auth-tab active" onclick="switchTab('login')">Login</div>
+        <div id="tab-register" class="auth-tab" onclick="switchTab('register')">Sign Up</div>
+      </div>
+
+      <div class="auth-form">
+        <!-- Login Form -->
+        <form id="form-login" class="toggle-section active" onsubmit="handleLogin(event)">
+          <h2 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">Welcome Back</h2>
+          
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="e.g. john@example.com" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label" for="login-password">Password</label>
+            <input type="password" id="login-password" class="form-input" placeholder="Enter password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">Sign In</button>
+        </form>
+
+        <!-- Registration Form -->
+        <form id="form-register" class="toggle-section" onsubmit="handleRegister(event)">
+          <h2 style="margin-bottom: 24px; font-size: 24px; font-weight: 700;">Create Account</h2>
+          
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="e.g. John Doe" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="form-input" placeholder="e.g. john@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-phone">Phone Number</label>
+            <input type="tel" id="reg-phone" class="form-input" placeholder="e.g. +1234567890" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-address">Delivery Address</label>
+            <textarea id="reg-address" class="form-input" rows="2" placeholder="e.g. Street name, City, Zip"></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label" for="reg-role">I want to register as a:</label>
+            <select id="reg-role" class="form-input">
+              <option value="customer">Customer (Order Food)</option>
+              <option value="owner">Restaurant Owner (Manage Menu & Orders)</option>
+              <option value="delivery">Delivery Driver (Deliver Orders)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">Register Account</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

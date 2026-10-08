@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Restaurant Owner Panel</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .owner-tab-view {
+      display: none;
+    }
+    .owner-tab-view.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <!-- Add Category Modal -->
+  <div id="add-category-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="font-size: 20px; margin-bottom: 20px;">Add New Category</h3>
+      <div class="form-group">
+        <label class="form-label" for="new-category-name">Category Name</label>
+        <input type="text" id="new-category-name" class="form-input" placeholder="e.g. Pasta, Desserts">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button class="btn btn-secondary" onclick="closeModal('add-category-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Food Item Modal -->
+  <div id="food-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 550px;">
+      <h3 id="food-modal-title" style="font-size: 20px; margin-bottom: 20px;">Add Menu Item</h3>
+      
+      <input type="hidden" id="food-item-id">
+      
+      <div class="form-group">
+        <label class="form-label" for="food-name">Item Name</label>
+        <input type="text" id="food-name" class="form-input" placeholder="e.g. Margherita Pizza" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label" for="food-category-select">Category</label>
+          <select id="food-category-select" class="form-input">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="food-price">Price (Rs.)</label>
+          <input type="number" id="food-price" step="0.01" class="form-input" placeholder="e.g. 12.99" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="food-desc">Description</label>
+        <textarea id="food-desc" class="form-input" rows="2" placeholder="Describe the item..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="food-img">Image URL</label>
+        <input type="text" id="food-img" class="form-input" placeholder="https://unsplash.com/...">
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+        <input type="checkbox" id="food-available" checked>
+        <label for="food-available" style="font-size: 14px; font-weight: 500;">Available for Ordering</label>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button class="btn btn-secondary" onclick="closeModal('food-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitFoodItem()">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Delivery Driver Modal -->
+  <div id="assign-driver-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="font-size: 20px; margin-bottom: 20px;">Assign Delivery Agent</h3>
+      <input type="hidden" id="assign-order-id">
+      
+      <div class="form-group">
+        <label class="form-label" for="driver-select">Available Agents</label>
+        <select id="driver-select" class="form-input">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+      
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button class="btn btn-secondary" onclick="closeModal('assign-driver-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitAssignment()">Assign & Prepare</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <main class="container dashboard-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--primary);">Kitchen Management</h2>
+      <div id="btn-tab-profile" class="sidebar-btn active" onclick="switchDashboardTab('profile')">
+        <span>Restaurant Profile</span>
+      </div>
+      <div id="btn-tab-menu" class="sidebar-btn" onclick="switchDashboardTab('menu')">
+        <span>Menu & Categories</span>
+      </div>
+      <div id="btn-tab-orders" class="sidebar-btn" onclick="switchDashboardTab('orders')">
+        <span>Incoming Orders</span>
+      </div>
+    </aside>
+
+    <!-- Main Dynamic Content Panel -->
+    <section class="main-content">
+      
+      <!-- ============ TAB: Restaurant Profile ============ -->
+      <div id="view-profile" class="owner-tab-view active">
+        <h2 style="font-size: 24px; margin-bottom: 20px;">Restaurant Profile Settings</h2>
+        
+        <!-- Loading Alert fallback -->
+        <div id="no-restaurant-alert" style="display:none; background:#fffbeb; border:1px solid #fef3c7; color:#b45309; padding:20px; border-radius:var(--radius-md); margin-bottom:24px;">
+          <strong>Awaiting Setup</strong>: You have not registered a restaurant yet, or your submission is awaiting administrator approval.
+        </div>
+
+        <form id="owner-profile-form" onsubmit="saveProfileSettings(event)">
+          <input type="hidden" id="profile-rest-id">
+          
+          <div class="form-group">
+            <label class="form-label" for="profile-name">Restaurant Name</label>
+            <input type="text" id="profile-name" class="form-input" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="profile-cuisine">Cuisine Type</label>
+              <input type="text" id="profile-cuisine" class="form-input" placeholder="e.g. Italian, Burgers">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="profile-phone">Contact Phone</label>
+              <input type="tel" id="profile-phone" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-desc">Description</label>
+            <textarea id="profile-desc" class="form-input" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profile-address">Street Address</label>
+            <textarea id="profile-address" class="form-input" rows="2" required></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 28px;">
+            <label class="form-label" for="profile-img">Image URL</label>
+            <input type="text" id="profile-img" class="form-input">
+          </div>
+
+          <button type="submit" id="profile-submit-btn" class="btn btn-primary">Save Profile Settings</button>
+        </form>
+      </div>
+
+      <!-- ============ TAB: Menu Management ============ -->
+      <div id="view-menu" class="owner-tab-view">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+          <h2 style="font-size: 24px;">Menu & Catalog Manager</h2>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-secondary" onclick="openAddCategoryModal()">Add Category</button>
+            <button id="add-item-btn-hook" class="btn btn-primary" onclick="openAddFoodModal()">Add Food Item</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="owner-menu-rows">
+              <!-- Loaded dynamically via owner.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Incoming Orders ============ -->
+      <div id="view-orders" class="owner-tab-view">
+        <h2 style="font-size: 24px; margin-bottom: 20px;">Incoming Order Tickets</h2>
+        
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Total Value</th>
+                <th>Placed At</th>
+                <th>Current Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="owner-orders-rows">
+              <!-- Loaded dynamically via owner.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/owner.js"></script>
+</body>
+</html>

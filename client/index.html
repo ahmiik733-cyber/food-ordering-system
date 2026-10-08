@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Food Ordering & Restaurant Management</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar Hook -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <h1 class="hero-title">Delicious food, delivered to your <span style="color: var(--primary);">doorstep</span></h1>
+        <p class="hero-subtitle">Discover top-rated restaurants, browse customized menus, and track your meals in real time. Fast, secure, and fresh.</p>
+        
+        <div class="search-bar-wrapper">
+          <input type="text" id="search-input" placeholder="Search by restaurant name or cuisine...">
+          <button class="btn btn-primary" onclick="searchRestaurants()">Search</button>
+        </div>
+      </div>
+      <div class="hero-image-pane" style="text-align: center;">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=60" alt="Delicious Food Array" style="width: 100%; max-width: 450px; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Showcase Section -->
+  <main class="container" style="margin-bottom: 80px;">
+    <!-- Cuisine Pills Filter -->
+    <section class="cuisines-filter" style="margin-bottom: 32px;">
+      <h2 style="font-size: 24px; margin-bottom: 16px;">Browse by Cuisine</h2>
+      <div id="cuisine-pills" style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <!-- Loaded dynamically via landing.js -->
+        <button class="btn btn-secondary btn-sm active-pill" onclick="filterCuisine('')">All Cuisines</button>
+      </div>
+    </section>
+
+    <!-- Restaurants List -->
+    <section class="restaurants-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 28px;">Featured Restaurants</h2>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <label for="rating-select" style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Min Rating:</label>
+          <select id="rating-select" class="form-input" style="padding: 6px 12px; width: 120px; font-size: 14px;" onchange="filterRating()">
+            <option value="0">Show All</option>
+            <option value="4.5">4.5+ ★</option>
+            <option value="4.0">4.0+ ★</option>
+            <option value="3.5">3.5+ ★</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="restaurants-grid" class="grid">
+        <!-- Loaded dynamically via landing.js -->
+        <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-secondary);">
+          Loading restaurants...
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Foot Section -->
+  <footer style="background-color: var(--text-primary); color: white; padding: 48px 0; border-top: 1px solid var(--border);">
+    <div class="container" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 32px;">
+      <div>
+        <h3 style="color: var(--primary); font-size: 24px; margin-bottom: 12px;">QuickBites</h3>
+        <p style="color: var(--text-light); max-width: 300px; font-size: 14px;">Bringing delicious hot food directly from your favorite local kitchens to your dining table.</p>
+      </div>
+      <div style="display: flex; gap: 48px;">
+        <div>
+          <h4 style="color: white; margin-bottom: 12px; font-size: 16px;">Platform</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text-light);">
+            <li><a href="auth.html">Restaurant Register</a></li>
+            <li><a href="auth.html">Delivery Agent signup</a></li>
+            <li><a href="auth.html">Admin Login</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: white; margin-bottom: 12px; font-size: 16px;">Support</h4>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text-light);">
+            <li>Help Center</li>
+            <li>Terms of Service</li>
+            <li>Privacy Policy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; font-size: 12px; color: var(--text-light);">
+      &copy; 2026 QuickBites. All rights reserved. University DBMS Term Project.
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/landing.js"></script>
+</body>
+</html>

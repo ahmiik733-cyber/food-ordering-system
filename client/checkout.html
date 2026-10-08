@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Checkout & Payment</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .payment-option-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .payment-option-card:hover, .payment-option-card.active {
+      border-color: var(--primary);
+      background: #fff7ed;
+    }
+    .payment-fields {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      animation: slideIn 0.3s ease-out;
+    }
+    .payment-fields.active {
+      display: block;
+    }
+    .processing-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      z-index: 4000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      display: none;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255,255,255,0.2);
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <!-- Processing Modal Overlay -->
+  <div id="processing-modal" class="processing-overlay">
+    <div class="spinner"></div>
+    <h2 id="process-title" style="color: white; margin-bottom: 8px;">Processing Transaction...</h2>
+    <p id="process-subtitle" style="color: var(--text-light); font-size:14px;">Please do not close this window or press back.</p>
+  </div>
+
+  <main class="container" style="margin-bottom: 80px;">
+    <h1 style="font-size: 32px; margin-top: 40px; margin-bottom: 24px;">Checkout</h1>
+    
+    <div class="checkout-grid">
+      
+      <!-- Left side: Shipping and payment methods -->
+      <div>
+        <!-- Delivery Information Card -->
+        <div class="card" style="padding: 32px; margin-bottom: 24px;">
+          <h2 style="font-size: 22px; margin-bottom: 20px;">1. Delivery Address</h2>
+          
+          <form id="checkout-form">
+            <div class="form-group">
+              <label class="form-label" for="ship-name">Recipient Name</label>
+              <input type="text" id="ship-name" class="form-input" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="ship-phone">Contact Phone Number</label>
+              <input type="tel" id="ship-phone" class="form-input" required>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="ship-address">Street Address</label>
+              <textarea id="ship-address" class="form-input" rows="3" required></textarea>
+            </div>
+          </form>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="card" style="padding: 32px;">
+          <h2 style="font-size: 22px; margin-bottom: 20px;">2. Payment Method</h2>
+          
+          <!-- EasyPaisa option -->
+          <div class="payment-option-card active" onclick="selectPaymentMethod('easypaisa')">
+            <input type="radio" name="pay-method" id="pay-easypaisa" value="easypaisa" checked>
+            <label for="pay-easypaisa" style="font-weight: 600; cursor: pointer;">EasyPaisa / Mobile Wallet</label>
+          </div>
+          <div id="fields-easypaisa" class="payment-fields active">
+            <div class="form-group">
+              <label class="form-label" for="easypaisa-num">EasyPaisa Mobile Number</label>
+              <input type="text" id="easypaisa-num" class="form-input" placeholder="e.g. 03001234567">
+            </div>
+          </div>
+
+          <!-- Card Option -->
+          <div class="payment-option-card" onclick="selectPaymentMethod('card')">
+            <input type="radio" name="pay-method" id="pay-card" value="card">
+            <label for="pay-card" style="font-weight: 600; cursor: pointer;">Credit / Debit Card</label>
+          </div>
+          <div id="fields-card" class="payment-fields">
+            <div class="form-group">
+              <label class="form-label" for="card-num">Card Number</label>
+              <input type="text" id="card-num" class="form-input" placeholder="0000 0000 0000 0000">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group">
+                <label class="form-label" for="card-exp">Expiry Date</label>
+                <input type="text" id="card-exp" class="form-input" placeholder="MM/YY">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="card-cvv">CVV</label>
+                <input type="password" id="card-cvv" class="form-input" placeholder="123">
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash Option -->
+          <div class="payment-option-card" onclick="selectPaymentMethod('cash')">
+            <input type="radio" name="pay-method" id="pay-cash" value="cash">
+            <label for="pay-cash" style="font-weight: 600; cursor: pointer;">Cash on Delivery (COD)</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right side: Preview items & pay summary -->
+      <div>
+        <div class="card" style="padding: 28px; position: sticky; top: 100px;">
+          <h3 style="font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Order Summary</h3>
+          
+          <div id="checkout-items-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;">
+            <!-- Loaded dynamically via checkout.js -->
+          </div>
+
+          <div style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
+            <div class="summary-row">
+              <span style="color: var(--text-secondary);">Subtotal</span>
+              <span id="check-subtotal">Rs. 0.00</span>
+            </div>
+            <div class="summary-row">
+              <span style="color: var(--text-secondary);">Delivery Fee</span>
+              <span>Rs. 3.99</span>
+            </div>
+            <div class="summary-row">
+              <span style="color: var(--text-secondary);">Taxes (5%)</span>
+              <span id="check-tax">Rs. 0.00</span>
+            </div>
+            <div class="summary-row" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; font-size: 18px;">
+              <strong>Total</strong>
+              <strong id="check-total" style="color: var(--primary);">Rs. 0.00</strong>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width: 100%; padding: 14px; margin-top: 24px;" onclick="placeOrderAndPay()">Place Order & Pay</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+</html>

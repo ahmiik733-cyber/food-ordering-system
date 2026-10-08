@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Order Delivery Status</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .tracking-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .milestones {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 40px 0;
+    }
+    .milestones::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      right: 10px;
+      height: 4px;
+      background: var(--border);
+      z-index: 1;
+    }
+    .milestone-bar-active {
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      height: 4px;
+      background: var(--success);
+      z-index: 2;
+      width: 0%;
+      transition: width 0.8s ease;
+    }
+    .milestone {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .milestone-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 3px solid white;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-weight: 700;
+      transition: var(--transition);
+    }
+    .milestone.active .milestone-dot {
+      background: var(--primary);
+      color: white;
+    }
+    .milestone.completed .milestone-dot {
+      background: var(--success);
+      color: white;
+    }
+    .map-simulation-container {
+      background: #e2e8f0;
+      border-radius: var(--radius-lg);
+      height: 300px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    .road {
+      position: absolute;
+      height: 8px;
+      background: #94a3b8;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .delivery-marker {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      transform: translate(-50%, -70%);
+      font-size: 32px;
+      transition: left 2s ease;
+      z-index: 10;
+    }
+    .restaurant-marker {
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      transform: translate(-50%, -120%);
+      z-index: 5;
+    }
+    .home-marker {
+      position: absolute;
+      top: 50%;
+      left: 90%;
+      transform: translate(-50%, -120%);
+      z-index: 5;
+    }
+    .toggle-role-view {
+      display: none;
+    }
+    .toggle-role-view.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <main class="container" style="margin-bottom: 80px;">
+    
+    <!-- ================= CUSTOMER VIEW ================= -->
+    <div id="view-customer" class="toggle-role-view">
+      <h1 style="font-size: 32px; margin-top: 40px;">Live Order Tracking</h1>
+      
+      <div id="no-active-order-view" style="display: none; text-align: center; padding: 60px 0;">
+        <svg width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 16px; color: var(--text-light);"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.03 0 1.9.693 2.166 1.638m-7.377 0A48.536 48.536 0 0112 3c.08 0 .16.002.24.005m-7.24 16.27V6.108c0-1.135.845-2.098 1.976-2.192a48.424 48.424 0 011.123-.08M3.19 6.75a8.96 8.96 0 012.288-4.076M1.087 18.751A17.965 17.965 0 0012 21.75c4.7 0 8.94-1.8 12-4.757"></path></svg>
+        <h2 style="font-size: 22px; margin-bottom: 8px;">No active order to track</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Place a new order first to track status in real time.</p>
+        <a href="index.html" class="btn btn-primary">Order Food Now</a>
+      </div>
+
+      <div id="active-tracking-view" class="tracking-grid">
+        <!-- Left panel: Live milestones map tracking -->
+        <div>
+          <!-- Milestones tracker bar -->
+          <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 18px; margin-bottom: 12px;">Order ID: <span id="track-order-id" style="color: var(--primary);">#00</span></h3>
+            
+            <div class="milestones">
+              <div id="milestone-progress-bar" class="milestone-bar-active"></div>
+              
+              <div class="milestone" id="step-placed">
+                <div class="milestone-dot">1</div>
+                Placed
+              </div>
+              <div class="milestone" id="step-preparing">
+                <div class="milestone-dot">2</div>
+                Preparing
+              </div>
+              <div class="milestone" id="step-transit">
+                <div class="milestone-dot">3</div>
+                On The Way
+              </div>
+              <div class="milestone" id="step-delivered">
+                <div class="milestone-dot">4</div>
+                Delivered
+              </div>
+            </div>
+          </div>
+
+          <!-- Animated Simulated Map Panel -->
+          <div class="map-simulation-container">
+            <div class="road"></div>
+            <!-- Restaurant Icon -->
+            <div class="restaurant-marker" style="font-size: 28px;">🍳</div>
+            <!-- Home Icon -->
+            <div class="home-marker" style="font-size: 28px;">🏠</div>
+            <!-- Delivery Bike Icon -->
+            <div id="delivery-bike" class="delivery-marker">🛵</div>
+            
+            <div style="position: absolute; bottom: 16px; left: 16px; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: var(--radius-sm); font-size:12px; font-weight:600; color: var(--text-secondary); box-shadow: var(--shadow-sm);">
+              📍 Simulated Live Route
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel: Times, Deliver details -->
+        <div>
+          <div class="card" style="padding: 24px; margin-bottom: 24px;">
+            <h3 style="font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Delivery Details</h3>
+            
+            <div style="margin-bottom: 16px;">
+              <span style="display:block; font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Estimated Arrival</span>
+              <strong style="font-size: 28px; color: var(--primary);" id="track-est-time">Calculating...</strong>
+            </div>
+
+            <div style="margin-bottom: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+              <span style="display:block; font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Restaurant</span>
+              <strong style="font-size: 15px;" id="track-restaurant-name">Gourmet Kitchen</strong>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <span style="display:block; font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Deliver Address</span>
+              <p style="font-size: 14px;" id="track-delivery-address">Street details...</p>
+            </div>
+
+            <div id="delivery-agent-info" style="border-top: 1px solid var(--border); padding-top: 16px; display: none;">
+              <span style="display:block; font-size: 12px; color: var(--text-secondary); text-transform: uppercase;">Delivery Partner</span>
+              <strong style="font-size: 15px; display:block;" id="track-driver-name">Driver Name</strong>
+              <span id="track-driver-vehicle" style="font-size: 12px; color: var(--text-light);">Vehicle Details</span>
+              <p style="font-size: 14px; margin-top: 4px;" id="track-driver-phone">Phone number</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= DRIVER / DELIVERY STAFF PANEL ================= -->
+    <div id="view-delivery" class="toggle-role-view">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 24px;">
+        <h1 style="font-size: 32px;">Delivery Courier Dashboard</h1>
+        
+        <!-- Status toggle online/offline -->
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 14px; font-weight: 500;">Duty Status:</span>
+          <select id="driver-status-select" class="form-input" style="padding: 6px 12px; width: 140px; font-size: 14px;" onchange="toggleDutyStatus()">
+            <option value="offline">Offline</option>
+            <option value="available">Available</option>
+            <option value="busy" disabled>Busy (On Order)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid" id="driver-orders-grid">
+        <!-- Loaded dynamically via delivery.js -->
+        <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-secondary);">
+          Checking for active delivery assignments...
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/delivery.js"></script>
+</body>
+</html>

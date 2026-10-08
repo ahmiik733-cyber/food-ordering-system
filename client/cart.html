@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Shopping Cart</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .cart-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .summary-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      height: fit-content;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <main class="container" style="margin-bottom: 80px;">
+    <h1 style="font-size: 32px; margin-top: 40px;">Your Shopping Cart</h1>
+    
+    <div id="cart-empty-view" style="display: none; text-align: center; padding: 60px 0;">
+      <svg width="80" height="80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 16px; color: var(--text-light);"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"></path></svg>
+      <h2 style="font-size: 22px; margin-bottom: 8px;">Your cart is empty</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">Browse our top restaurants and add delicious items to satisfy your cravings.</p>
+      <a href="index.html" class="btn btn-primary">Find Restaurants</a>
+    </div>
+
+    <div id="cart-active-view" class="cart-grid">
+      
+      <!-- Cart items list table -->
+      <div class="card" style="padding: 24px;">
+        <h3 id="cart-restaurant-name" style="font-size: 18px; color: var(--primary); margin-bottom: 16px;">Ordering from: Restaurant</h3>
+        
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cart-items-rows">
+              <!-- Loaded dynamically via cart.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Total summary calculations -->
+      <div class="summary-card">
+        <h3 style="font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px;">Order Summary</h3>
+        
+        <div class="summary-row">
+          <span style="color: var(--text-secondary);">Subtotal</span>
+          <strong id="summary-subtotal">Rs. 0.00</strong>
+        </div>
+        <div class="summary-row">
+          <span style="color: var(--text-secondary);">Delivery Fee</span>
+          <strong>Rs. 3.99</strong>
+        </div>
+        <div class="summary-row">
+          <span style="color: var(--text-secondary);">GST & Services Taxes</span>
+          <strong id="summary-tax">Rs. 0.00</strong>
+        </div>
+        
+        <div class="summary-row" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; font-size: 18px;">
+          <strong>Total Amount</strong>
+          <strong id="summary-total" style="color: var(--primary);">Rs. 0.00</strong>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 14px; margin-top: 24px;" onclick="proceedToCheckout()">Proceed to Checkout</button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/cart.js"></script>
+</body>
+</html>

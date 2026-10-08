@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickBites - Administration Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-tab-view {
+      display: none;
+    }
+    .admin-tab-view.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+    .chart-container {
+      position: relative;
+      margin: 24px auto;
+      height: 320px;
+      width: 100%;
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+  </style>
+  <!-- Chart.js CDN for dynamic responsive charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-container" id="navbar-container-hook">
+      <!-- Loaded dynamically via client/js/api.js -->
+    </div>
+  </nav>
+
+  <!-- Edit User Role Modal -->
+  <div id="role-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="font-size: 20px; margin-bottom: 20px;">Modify User Role</h3>
+      <input type="hidden" id="role-user-id">
+      
+      <div class="form-group">
+        <label class="form-label" for="role-select">Select New Role</label>
+        <select id="role-select" class="form-input">
+          <option value="customer">Customer</option>
+          <option value="owner">Restaurant Owner</option>
+          <option value="delivery">Delivery Staff</option>
+          <option value="admin">System Admin</option>
+        </select>
+      </div>
+      
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button class="btn btn-secondary" onclick="closeModal('role-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitRoleChange()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container dashboard-layout">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--primary);">Admin Controls</h2>
+      <div id="btn-tab-overview" class="sidebar-btn active" onclick="switchAdminTab('overview')">
+        <span>Overview & KPIs</span>
+      </div>
+      <div id="btn-tab-users" class="sidebar-btn" onclick="switchAdminTab('users')">
+        <span>Users Registry</span>
+      </div>
+      <div id="btn-tab-approvals" class="sidebar-btn" onclick="switchAdminTab('approvals')">
+        <span>Restaurant Approvals</span>
+      </div>
+      <div id="btn-tab-reports" class="sidebar-btn" onclick="switchAdminTab('reports')">
+        <span>Reports & Analytics</span>
+      </div>
+    </aside>
+
+    <!-- Main Dynamic Panel -->
+    <section class="main-content">
+      
+      <!-- ============ TAB: System Overview ============ -->
+      <div id="view-overview" class="admin-tab-view active">
+        <h2 style="font-size: 24px; margin-bottom: 24px;">System Performance Overview</h2>
+        
+        <!-- KPI widgets -->
+        <div class="dashboard-kpis">
+          <div class="kpi-card">
+            <span style="font-size:12px; color:var(--text-secondary); text-transform:uppercase;">Total System Revenue</span>
+            <div class="kpi-val" id="kpi-revenue">Rs. 0.00</div>
+          </div>
+          <div class="kpi-card">
+            <span style="font-size:12px; color:var(--text-secondary); text-transform:uppercase;">Completed Orders</span>
+            <div class="kpi-val" id="kpi-completed-orders">0</div>
+          </div>
+          <div class="kpi-card">
+            <span style="font-size:12px; color:var(--text-secondary); text-transform:uppercase;">Active Restaurants</span>
+            <div class="kpi-val" id="kpi-active-restaurants">0</div>
+          </div>
+          <div class="kpi-card">
+            <span style="font-size:12px; color:var(--text-secondary); text-transform:uppercase;">Registered Users</span>
+            <div class="kpi-val" id="kpi-total-users">0</div>
+          </div>
+        </div>
+
+        <!-- Sales Chart Section -->
+        <div style="margin-top: 32px;">
+          <h3 style="font-size: 18px; margin-bottom: 12px;">Sales Revenue by Cuisine Type</h3>
+          <div class="chart-container">
+            <canvas id="revenue-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Users Registry ============ -->
+      <div id="view-users" class="admin-tab-view">
+        <h2 style="font-size: 24px; margin-bottom: 20px;">System Users Audit</h2>
+        
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>Contact Phone</th>
+                <th>Assigned Role</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-rows">
+              <!-- Loaded dynamically via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Restaurant Approvals ============ -->
+      <div id="view-approvals" class="admin-tab-view">
+        <h2 style="font-size: 24px; margin-bottom: 20px;">Restaurant Review Approvals</h2>
+        
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Restaurant ID</th>
+                <th>Restaurant Name</th>
+                <th>Cuisine Type</th>
+                <th>Address</th>
+                <th>Phone</th>
+                <th>Current Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-approvals-rows">
+              <!-- Loaded dynamically via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ TAB: Reports Generator ============ -->
+      <div id="view-reports" class="admin-tab-view">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+          <h2 style="font-size: 24px;">Reports & Data Logs Logs</h2>
+          
+          <div style="display:flex; gap:12px; align-items:center;">
+            <select id="report-type-select" class="form-input" style="width:160px; padding:8px 12px;">
+              <option value="sales">Sales & Financials</option>
+              <option value="system">System & Users</option>
+            </select>
+            <button class="btn btn-primary" onclick="triggerReportGeneration()">Generate Report</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Type</th>
+                <th>Generated At</th>
+                <th>Generated By</th>
+                <th>Details Preview</th>
+              </tr>
+            </thead>
+            <tbody id="admin-reports-rows">
+              <!-- Loaded dynamically via admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
